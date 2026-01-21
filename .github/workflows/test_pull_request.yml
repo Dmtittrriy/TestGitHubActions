@@ -164,10 +164,9 @@ jobs:
               <string>K46L923P44</string>
              
               <key>provisioningProfiles</key>
-              <dict>
-               
+              <dict>              
                   <key>com.brainbit.neuro2</key>
-                  <string>adhoc</string>
+                  <string>Neuro2-AdHoc(Semen-mac)</string>
               </dict>
 
               <key>signingCertificate</key>
