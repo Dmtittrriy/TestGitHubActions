@@ -206,18 +206,19 @@ jobs:
 
       - name: Build iOS AdHoc IPA
         env:
-            
-          FLUTTER_CODESIGN_KEYCHAIN: build.keychain
-          FLUTTER_CODESIGN_KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          APPLE_CODESIGN_KEYCHAIN: /Users/runner/Library/Keychains/build.keychain-db
+          KEYCHAIN_PATH: $RUNNER_TEMP/build.keychain  # Использовать тот же путь
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          security list-keychains -s build.keychain "$APPLE_CODESIGN_KEYCHAIN"
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+  
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+    
 
-          security find-identity -p codesigning -v
-           
-          
+          echo "=== Проверка сертификатов в keychain ==="
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+    
+
           flutter build ipa \
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
