@@ -88,6 +88,7 @@ jobs:
   build_ios:
     needs: [versioning]
     runs-on: macos-latest
+    
 
     steps:
       - name: Checkout
@@ -106,20 +107,20 @@ jobs:
     #############################
       - name: Decode certificate & profiles
         run: |
-          echo "$IOS_CERT_P12" | base64 --decode > build_certificate.p12
-          echo "$BUILD_ADHOC_PROVISION_PROFILE_BASE64" | base64 --decode > adhoc.mobileprovision
-          echo "$BUILD_APPSTORE_PROVISION_PROFILE_BASE64" | base64 --decode > appstore.mobileprovision
+          echo "${{ secrets.IOS_CERT_P12 }}" | base64 --decode > build_certificate.p12
+          echo "${{ secrets.IOS_PROVISION_ADHOC}}" | base64 --decode > adhoc.mobileprovision
+          echo ${{ secrets.IOS_PROVISION_APPSTORE}}" | base64 --decode > appstore.mobileprovision
 
     #############################
     # Создание keychain
     #############################
       - name: Create keychain
         run: |
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD}}" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD}}" build.keychain
 
-          security import build_certificate.p12 -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k build.keychain
+          security import build_certificate.p12 -P  "${{ secrets.IOS_CERT_PASSWORD}}" -A -t cert -f pkcs12 -k build.keychain
           security list-keychain -d user -s build.keychain
 
     #############################
@@ -150,23 +151,6 @@ jobs:
           </dict>
           </plist>
           EOF
-
-      - name: Create export options plist
-        run: |
-            cat > ios/export_options_adhoc.plist <<EOF
-            <?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0">
-            <dict>
-                <key>method</key>
-                <string>ad-hoc</string>
-                <key>signingStyle</key>
-                <string>manual</string>
-                <key>compileBitcode</key>
-                <false/>
-            </dict>
-            </plist>
-            EOF
 
 
       - name: Build iOS AdHoc IPA
