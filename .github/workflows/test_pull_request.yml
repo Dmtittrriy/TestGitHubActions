@@ -106,21 +106,29 @@ jobs:
     # Декодирование сертификата
     #############################
       - name: Decode certificate & profiles
+        env:
+          IOS_CERT_P12: ${{ secrets.IOS_CERT_P12 }}
+          IOS_PROVISION_ADHOC: "${{ secrets.IOS_PROVISION_ADHOC}}"
+          IOS_PROVISION_APPSTORE: ${{ secrets.IOS_PROVISION_APPSTORE}}" 
+
         run: |
-          echo "${{ secrets.IOS_CERT_P12 }}" | base64 --decode > build_certificate.p12
-          echo "${{ secrets.IOS_PROVISION_ADHOC}}" | base64 --decode > adhoc.mobileprovision
-          echo ${{ secrets.IOS_PROVISION_APPSTORE}}" | base64 --decode > appstore.mobileprovision
+          echo "$IOS_CERT_P12" | base64 --decode > build_certificate.p12
+          echo "$IOS_PROVISION_ADHOC" | base64 --decode > adhoc.mobileprovision
+          echo "$IOS_PROVISION_APPSTORE" | base64 --decode > appstore.mobileprovision
 
     #############################
     # Создание keychain
     #############################
       - name: Create keychain
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD}}
+          IOS_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD}}
         run: |
-          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD}}" build.keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
-          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD}}" build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
 
-          security import build_certificate.p12 -P  "${{ secrets.IOS_CERT_PASSWORD}}" -A -t cert -f pkcs12 -k build.keychain
+          security import build_certificate.p12 -P  "$IOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k build.keychain
           security list-keychain -d user -s build.keychain
 
     #############################
