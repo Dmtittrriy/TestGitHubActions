@@ -101,14 +101,13 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Decode certificates
+      - name: Decode certificates ANd Install certificate & profiles
         env:      
           IOS_CERT_P12: ${{ secrets.IOS_CERT_P12 }}
           P12_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
           BUILD_ADHOC_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_ADHOC }}
           BUILD_AppStore_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_APPSTORE }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-
         run: |
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_ADHOC_PATH=$RUNNER_TEMP/build_adhoc_pp.mobileprovision
@@ -123,10 +122,6 @@ jobs:
           echo "$IOS_CERT_P12" | base64 --decode -o CERTIFICATE_PATH
           echo "$BUILD_ADHOC_PROVISION_PROFILE_BASE64" | base64 --decode -o PP_ADHOC_PATH
           echo "$BUILD_AppStore_PROVISION_PROFILE_BASE64" | base64 --decode -o PP_DES_PATH
-        #===echo "$APPSTORE_API_KEY" | base64 --decode > AuthKey.p8
-
-      - name: Install certificate & profiles
-        run: |
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
