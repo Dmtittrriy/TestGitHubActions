@@ -172,6 +172,8 @@ jobs:
                   <string>Neuro2-AdHoc(Semen-mac)</string>
               </dict>
 
+              <key>signingCertificate</key>
+              <string>Apple Distribution: BRAINBIT INC. (K46L923P44)</string>
               
               <key>compileBitcode</key>
               <true/>
@@ -199,8 +201,16 @@ jobs:
 
       - name: Build iOS AdHoc IPA
         run: |
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security find-identity -p codesigning -v
 
+          flutter build ipa \
+            --release \
+            --no-codesign
+           
+          echo "Build no-codesign complete"
           flutter build ipa \
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
