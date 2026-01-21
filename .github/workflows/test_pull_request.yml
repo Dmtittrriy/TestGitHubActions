@@ -169,7 +169,7 @@ jobs:
               <dict>
                
                   <key>com.brainbit.neuro2</key>
-                  <string>Neuro2-AdHoc(Semen-mac)</string>
+                  <string>adhoc</string>
               </dict>
 
               <key>signingCertificate</key>
@@ -200,13 +200,19 @@ jobs:
           EOF
 
       - name: Build iOS AdHoc IPA
+        env:
+            
+          FLUTTER_CODESIGN_KEYCHAIN: build.keychain
+          FLUTTER_CODESIGN_KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_CODESIGN_KEYCHAIN: /Users/runner/Library/Keychains/build.keychain-db
         run: |
-          security list-keychains -s build.keychain
+          security list-keychains -s build.keychain "$APPLE_CODESIGN_KEYCHAIN"
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+
           security find-identity -p codesigning -v
            
-          echo "Build no-codesign complete"
+          
           flutter build ipa \
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
