@@ -147,14 +147,52 @@ jobs:
         run: |
           cat > ios/export_options_adhoc.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" 
+          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
+             
               <key>method</key>
               <string>ad-hoc</string>
+
+             
               <key>signingStyle</key>
               <string>manual</string>
+
+              <key>teamID</key>
+              <string>K46L923P44</string>
+             
+              <key>provisioningProfiles</key>
+              <dict>
+               
+                  <key>com.brainbit.neuro2</key>
+                  <string>Neuro2-AdHoc(Semen-mac)</string>
+              </dict>
+
+              
               <key>compileBitcode</key>
+              <true/>
+
+              
+              <key>destination</key>
+              <string>export</string>
+
+              
+              <key>signingCertificate</key>
+              <string>iPhone Distribution</string>
+
+              
+              <key>thinning</key>
+              <string>&lt;none&gt;</string>
+
+              
+              <key>stripSwiftSymbols</key>
+              <true/>
+
+              >
+              <key>uploadSymbols</key>
+              <false/>
+              <key>uploadBitcode</key>
               <false/>
           </dict>
           </plist>
