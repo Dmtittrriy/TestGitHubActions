@@ -206,10 +206,20 @@ jobs:
 
       - name: Build iOS AdHoc IPA
         env:
-          KEYCHAIN_PATH: $RUNNER_TEMP/build.keychain  # Использовать тот же путь
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-  
+        run: |           
+          KEYCHAIN_PATH ="$RUNNER_TEMP/build.keychain"
+          
+          if [ ! -f "$KEYCHAIN_PATH" ]; then
+            echo "❌ ОШИБКА: Keychain не найден по пути: $KEYCHAIN_PATH"
+            echo "Содержимое $RUNNER_TEMP:"
+            ls -la "$RUNNER_TEMP" || true
+            exit 1
+          fi
+          
+          echo "✅ Используем keychain: $KEYCHAIN_PATH"
+
+          
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
           security default-keychain -s "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
