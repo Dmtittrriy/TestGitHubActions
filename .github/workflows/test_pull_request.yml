@@ -189,7 +189,7 @@ jobs:
               <key>stripSwiftSymbols</key>
               <true/>
 
-              >
+              
               <key>uploadSymbols</key>
               <false/>
               <key>uploadBitcode</key>
