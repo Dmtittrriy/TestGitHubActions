@@ -207,7 +207,7 @@ jobs:
         env:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |           
-          KEYCHAIN_PATH ="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
           
           if [ ! -f "$KEYCHAIN_PATH" ]; then
             echo "❌ ОШИБКА: Keychain не найден по пути: $KEYCHAIN_PATH"
