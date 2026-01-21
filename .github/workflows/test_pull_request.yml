@@ -130,6 +130,9 @@ jobs:
 
           security import build_certificate.p12 -P  "$IOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k build.keychain
           security list-keychain -d user -s build.keychain
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
 
     #############################
     # Добавление provisioning profiles
@@ -178,10 +181,6 @@ jobs:
               <string>export</string>
 
               
-              <key>signingCertificate</key>
-              <string>iPhone Distribution</string>
-
-              
               <key>thinning</key>
               <string>&lt;none&gt;</string>
 
@@ -198,9 +197,10 @@ jobs:
           </plist>
           EOF
 
-
       - name: Build iOS AdHoc IPA
         run: |
+          security find-identity -p codesigning -v
+
           flutter build ipa \
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
