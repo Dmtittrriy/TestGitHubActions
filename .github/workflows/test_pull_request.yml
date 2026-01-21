@@ -103,16 +103,25 @@ jobs:
 
       - name: Decode certificates
         run: |
-          echo "$IOS_CERT_P12" | base64 --decode > cert.p12
-          echo "$IOS_PROVISION_ADHOC" | base64 --decode > adhoc.mobileprovision
-          echo "$IOS_PROVISION_APPSTORE" | base64 --decode > appstore.mobileprovision
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_ADHOC_PATH=$RUNNER_TEMP/build_adhoc_pp.mobileprovision
+          PP_DES_PATH=$RUNNER_TEMP/build_des_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo "$IOS_CERT_P12" | base64 --decode -o CERTIFICATE_PATH
+          echo "$IOS_PROVISION_ADHOC" | base64 --decode -o PP_ADHOC_PATH
+          echo "$IOS_PROVISION_APPSTORE" | base64 --decode -o PP_DES_PATH
         #===echo "$APPSTORE_API_KEY" | base64 --decode > AuthKey.p8
 
       - name: Install certificate & profiles
         run: |
-          security create-keychain -p "" build.keychain
-          security import cert.p12 -k build.keychain -P "$IOS_CERT_PASSWORD" -A
-          security unlock-keychain -p "" build.keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          security import CERTIFICATE_PATH -P "$IOS_CERT_P12" -A -t cert -f pkcs12 -k $
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH         
 
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp adhoc.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
