@@ -1,0 +1,136 @@
+name: Test Pull request
+
+on:
+  pull_request:
+    branches:
+      - main
+    workflow_dispatch:
+
+env:
+  FLUTTER_CHANNEL: stable
+
+
+jobs:
+  versioning:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION_NAME: ${{ steps.set.outputs.VERSION_NAME }}
+      VERSION_CODE: ${{ steps.set.outputs.VERSION_CODE }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from pubspec
+        id: set
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //;s/+.*//')
+          VERSION_CODE=${GITHUB_RUN_NUMBER}
+
+          echo "VERSION_NAME=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
+          echo "VERSION_NAME=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+
+      - name: Show version
+        run: |
+          echo "VERSION_NAME: $VERSION_NAME"
+          echo "VERSION_CODE: $VERSION_CODE"
+
+
+
+  #  BUILD AND UPLOAD ANDROID (AAB)
+  build_android:
+    needs: [versioning]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Decode keystore
+        run: echo "$ANDROID_KEYSTORE" | base64 --decode > android.keystore
+
+      - name: Setup signing
+        run: |
+          mkdir -p android/app
+          cat > android/app/key.properties <<EOF
+          storePassword=${ANDROID_KEYSTORE_PASSWORD}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          storeFile=../android.keystore
+          EOF
+
+      - name: Build Android AAB
+        run: |
+          flutter build appbundle \
+            --release \
+            --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
+            --build-number=${{ needs.versioning.outputs.VERSION_CODE }}
+
+      - name: Upload Android AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab
+          path: build/app/outputs/bundle/release/*.aab
+
+
+  # BUILD AND UPLOAD IOS (AdHoc)
+  build_ios:
+    needs: [versioning]
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Decode certificates
+        run: |
+          echo "$IOS_CERT_P12" | base64 --decode > cert.p12
+          echo "$IOS_PROVISION_ADHOC" | base64 --decode > adhoc.mobileprovision
+          echo "$IOS_PROVISION_APPSTORE" | base64 --decode > appstore.mobileprovision
+        #===echo "$APPSTORE_API_KEY" | base64 --decode > AuthKey.p8
+
+      - name: Install certificate & profiles
+        run: |
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -k build.keychain -P "$IOS_CERT_PASSWORD" -A
+          security unlock-keychain -p "" build.keychain
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp adhoc.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build iOS AdHoc IPA
+        run: |
+          flutter build ipa \
+            --release \
+            --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
+            --build-number=${{ needs.versioning.outputs.VERSION_CODE }} \
+            --export-options-plist=ios/export_options_adhoc.plist
+
+      - name: Upload iOS AdHoc Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-adhoc-ipa
+          path: build/ios/ipa/*.ipa
+
+
+
+

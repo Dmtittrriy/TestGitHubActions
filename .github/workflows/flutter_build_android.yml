@@ -3,7 +3,7 @@ on:
   workflow_dispatch: # Ручной запуск
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout sources
@@ -17,7 +17,7 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      # === АВТОВЕРСИФИКАЦИЯ ===
+      # === VERSION ===
       - name: Generate build version
         id: version
         run: |
@@ -32,7 +32,7 @@ jobs:
           echo "VERSION: $VERSION_NAME"
           echo "VERSION CODE: $VERSION_CODE"
 
-      # === KEYSTORE ===
+      # === KEYSTORE Decode ===
       - name: Decode keystore
         run: echo "$ANDROID_KEYSTORE" | base64 --decode > android.keystore
 
@@ -46,6 +46,7 @@ jobs:
           storeFile=../android.keystore
           EOF
 
+      #=== Build AAB ===
       - name: Build AAB
         run: |
           flutter build appbundle \
