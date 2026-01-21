@@ -158,19 +158,11 @@ jobs:
 
              
               <key>signingStyle</key>
-              <string>manual</string>
+              <string>automatic</string>
 
               <key>teamID</key>
               <string>K46L923P44</string>
              
-              <key>provisioningProfiles</key>
-              <dict>              
-                  <key>com.brainbit.neuro2</key>
-                  <string>Neuro2-AdHoc(Semen-mac)</string>
-              </dict>
-
-              <key>signingCertificate</key>
-              <string>Apple Distribution: BRAINBIT INC. (K46L923P44)</string>
               
               <key>compileBitcode</key>
               <true/>
@@ -182,16 +174,6 @@ jobs:
               
               <key>thinning</key>
               <string>&lt;none&gt;</string>
-
-              
-              <key>stripSwiftSymbols</key>
-              <true/>
-
-              
-              <key>uploadSymbols</key>
-              <false/>
-              <key>uploadBitcode</key>
-              <false/>
           </dict>
           </plist>
           EOF
