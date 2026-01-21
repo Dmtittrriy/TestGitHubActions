@@ -1,4 +1,4 @@
-package com.example.test_github_actions
+package com.brainbit.neuro2
 
 import io.flutter.embedding.android.FlutterActivity
 
