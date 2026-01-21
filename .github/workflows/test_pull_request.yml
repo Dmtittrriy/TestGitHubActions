@@ -108,8 +108,8 @@ jobs:
       - name: Decode certificate & profiles
         env:
           IOS_CERT_P12: ${{ secrets.IOS_CERT_P12 }}
-          IOS_PROVISION_ADHOC: "${{ secrets.IOS_PROVISION_ADHOC}}"
-          IOS_PROVISION_APPSTORE: ${{ secrets.IOS_PROVISION_APPSTORE}}" 
+          IOS_PROVISION_ADHOC: ${{ secrets.IOS_PROVISION_ADHOC}}
+          IOS_PROVISION_APPSTORE: ${{ secrets.IOS_PROVISION_APPSTORE}}
 
         run: |
           echo "$IOS_CERT_P12" | base64 --decode > build_certificate.p12
