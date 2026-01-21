@@ -119,9 +119,10 @@ jobs:
           echo $PP_DES_PATH
           echo $KEYCHAIN_PATH
 
-          echo "$IOS_CERT_P12" | base64 --decode -o CERTIFICATE_PATH
-          echo "$BUILD_ADHOC_PROVISION_PROFILE_BASE64" | base64 --decode -o PP_ADHOC_PATH
-          echo "$BUILD_AppStore_PROVISION_PROFILE_BASE64" | base64 --decode -o PP_DES_PATH
+          echo "$IOS_CERT_P12" | base64 --decode > "$CERTIFICATE_PATH"
+          echo "$BUILD_ADHOC_PROVISION_PROFILE_BASE64" | base64 --decode > "$PP_ADHOC_PATH"
+          echo "$BUILD_AppStore_PROVISION_PROFILE_BASE64" | base64 --decode > "$PP_DES_PATH"
+          
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
