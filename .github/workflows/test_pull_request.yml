@@ -101,39 +101,34 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Decode certificates ANd Install certificate & profiles
-        env:      
+      - name: Decode certificates and install certificate & profiles
+        env:
           IOS_CERT_P12: ${{ secrets.IOS_CERT_P12 }}
           P12_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
           BUILD_ADHOC_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_ADHOC }}
           BUILD_AppStore_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_APPSTORE }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_ADHOC_PATH=$RUNNER_TEMP/build_adhoc_pp.mobileprovision
-          PP_DES_PATH=$RUNNER_TEMP/build_des_pp.mobileprovision
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain
-
-          echo $CERTIFICATE_PATH
-          echo $PP_ADHOC_PATH
-          echo $PP_DES_PATH
-          echo $KEYCHAIN_PATH
+          CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+          PP_ADHOC_PATH="$RUNNER_TEMP/build_adhoc_pp.mobileprovision"
+          PP_DES_PATH="$RUNNER_TEMP/build_des_pp.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain"
 
           echo "$IOS_CERT_P12" | base64 --decode > "$CERTIFICATE_PATH"
           echo "$BUILD_ADHOC_PROVISION_PROFILE_BASE64" | base64 --decode > "$PP_ADHOC_PATH"
           echo "$BUILD_AppStore_PROVISION_PROFILE_BASE64" | base64 --decode > "$PP_DES_PATH"
-          
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH         
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp adhoc.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-          cp appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp "$PP_ADHOC_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp "$PP_DES_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Build iOS AdHoc IPA
         run: |
