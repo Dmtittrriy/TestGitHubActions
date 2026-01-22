@@ -177,8 +177,7 @@ jobs:
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
             --build-number=${{ needs.versioning.outputs.VERSION_CODE }} \
-            --export-options-plist=ios/export_options_adhoc.plist
-            --output=build/ios/ipa/app.ipa
+            --export-options-plist=ios/Runner/export_options_adhoc.plist
 
 
       - name: Upload iOS AdHoc Artifact
