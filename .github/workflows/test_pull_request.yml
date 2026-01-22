@@ -89,7 +89,6 @@ jobs:
     needs: [versioning]
     runs-on: macos-latest
     
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -178,7 +177,9 @@ jobs:
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
             --build-number=${{ needs.versioning.outputs.VERSION_CODE }} \
-            --export-options-plist=ios/Runner/export_options_adhoc.plist
+            --export-options-plist=ios/export_options_adhoc.plist
+            --output=build/ios/ipa/app.ipa
+
 
       - name: Upload iOS AdHoc Artifact
         uses: actions/upload-artifact@v4
@@ -186,6 +187,29 @@ jobs:
           name: ios-adhoc-ipa
           path: build/ios/ipa/*.ipa
 
-
+      - name: Очистка keychain и профилей
+        if: always() 
+        run: |
+          echo "=== Начинаем очистку ==="
+          
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          if [ -f "$KEYCHAIN_PATH" ]; then
+            echo "Удаляю keychain: $KEYCHAIN_PATH"
+            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+          fi
+          
+          echo "Восстанавливаю системные keychain"
+          security list-keychains -d user -s login.keychain
+          security default-keychain -s login.keychain
+          
+          echo "Удаляю provisioning profiles"
+          rm -rf ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null || true
+          
+          echo "Удаляю временные файлы"
+          rm -f build_certificate.p12 2>/dev/null || true
+          rm -f adhoc.mobileprovision 2>/dev/null || true
+          rm -f appstore.mobileprovision 2>/dev/null || true
+          
+          echo "✅ Очистка завершена"
 
 
