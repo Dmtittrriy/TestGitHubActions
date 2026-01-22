@@ -141,42 +141,6 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp adhoc.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
           cp appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-    #############################
-    # Создание export_options.plist
-    #############################
-      - name: Create export options plist
-        run: |
-          cat > ios/export_options_adhoc.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" 
-          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-             
-              <key>method</key>
-              <string>ad-hoc</string>
-
-             
-              <key>signingStyle</key>
-              <string>automatic</string>
-
-              <key>teamID</key>
-              <string>K46L923P44</string>
-             
-              
-              <key>compileBitcode</key>
-              <true/>
-
-              
-              <key>destination</key>
-              <string>export</string>
-
-              
-              <key>thinning</key>
-              <string>&lt;none&gt;</string>
-          </dict>
-          </plist>
-          EOF
 
       - name: Debug - Проверить сертификаты в системе
         run: |
@@ -214,7 +178,7 @@ jobs:
             --release \
             --build-name=${{ needs.versioning.outputs.VERSION_NAME }} \
             --build-number=${{ needs.versioning.outputs.VERSION_CODE }} \
-            --export-options-plist=ios/export_options_adhoc.plist
+            --export-options-plist=ios/Runner/export_options_adhoc.plist
 
       - name: Upload iOS AdHoc Artifact
         uses: actions/upload-artifact@v4

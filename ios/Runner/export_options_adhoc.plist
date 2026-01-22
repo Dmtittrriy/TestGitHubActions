@@ -10,5 +10,12 @@
 	<string>ad-hoc</string>
 	<key>destination</key>
 	<string>export</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>provisioningProfiles</key>
+    <dict>
+        <key>com.brainbit.neuro2</key>
+        <string>Neuro2-AdHoc(Semen-mac)</string>
+    </dict>
 </dict>
 </plist>
